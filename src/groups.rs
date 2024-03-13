@@ -1,23 +1,25 @@
 use crate::emojis;
+use glib::clone;
 use gtk::gdk;
+use gtk::glib;
 use gtk::prelude::*;
 use gtk4 as gtk;
 use std::collections::HashMap;
-use std::process;
+use std::rc::Rc;
 
-pub fn load_groups(container: gtk::Notebook) {
+pub fn load_groups(container: gtk::Notebook, emojis: Rc<Vec<Rc<emojis::Emoji>>>) {
     let mut groups_containers = HashMap::<String, gtk::FlowBox>::new();
 
     let mut create_group = |symbol: &str, names: &[&str]| {
-        let group_box = gtk::FlowBox::new();
+        let group_box = gtk::FlowBox::builder()
+            .selection_mode(gtk::SelectionMode::None)
+            .build();
         let scrolled = gtk::ScrolledWindow::builder().child(&group_box).build();
 
         container.append_page(
             &scrolled,
             Some(
                 &gtk::Label::builder()
-                    .margin_start(10)
-                    .margin_end(10)
                     .label(symbol)
                     .tooltip_text(names.join(", "))
                     .build(),
@@ -37,30 +39,21 @@ pub fn load_groups(container: gtk::Notebook) {
     create_group("❗️", &["symbols"]);
     create_group("🇧🇷", &["flags"]);
 
-    let emojis = match emojis::load_emojis() {
-        Ok(emojis) => emojis,
-        Err(err) => {
-            eprintln!("{err}");
-            process::exit(1);
-        }
-    };
-
-    for emoji in emojis {
+    for emoji in emojis.as_ref() {
         if let Some(container) = groups_containers.get(&emoji.group) {
             let btn = gtk::Button::builder()
-                .tooltip_text(emoji.annotation)
+                .tooltip_text(&emoji.annotation)
                 .label(&emoji.emoji)
                 .build();
 
-            let emoji_char = emoji.emoji;
-
-            btn.connect_clicked(move |_| {
+            btn.connect_clicked(clone!(@strong emoji => move |_| {
+                println!("{}: {}", emoji.annotation, emoji.emoji);
                 let clipboard = gdk::Display::default()
                     .expect("Failed to get display")
                     .clipboard();
 
-                clipboard.set_text(&emoji_char);
-            });
+                clipboard.set_text(&emoji.emoji);
+            }));
 
             container.append(&btn);
         };

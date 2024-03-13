@@ -1,10 +1,13 @@
 mod emojis;
 mod groups;
+mod navigation;
 mod search;
 
 use gtk::glib;
 use gtk::prelude::*;
 use gtk4 as gtk;
+use std::process;
+use std::rc::Rc;
 
 const APP_ID: &str = "cafe.ndo.Emo";
 
@@ -29,10 +32,13 @@ fn build_ui(app: &gtk::Application) {
         .margin_end(5)
         .build();
 
+    let emoji_list = must_load_emojis();
+
     let search_result_container = search::build_search_result();
+    let notebook = build_notebook(emoji_list.clone());
 
     let stack = gtk::Stack::builder().build();
-    stack.add_named(&build_notebook(), Some("notebook"));
+    stack.add_named(&notebook, Some("notebook"));
     stack.add_named(&search_result_container, Some("search"));
 
     container.append(&search_entry);
@@ -48,14 +54,28 @@ fn build_ui(app: &gtk::Application) {
         .child(&container)
         .build();
 
+    navigation::handle_navigation(app, &window, &notebook);
+
     window.present();
 }
 
-fn build_notebook() -> gtk::Notebook {
+fn must_load_emojis() -> Rc<Vec<Rc<emojis::Emoji>>> {
+    let emoji_list = match emojis::load_emojis() {
+        Ok(emojis) => emojis,
+        Err(err) => {
+            eprintln!("{err}");
+            process::exit(1);
+        }
+    };
+
+    Rc::new(emoji_list.into_iter().map(Rc::new).collect())
+}
+
+fn build_notebook(emojis: Rc<Vec<Rc<emojis::Emoji>>>) -> gtk::Notebook {
     let container = gtk::Notebook::builder().hexpand(true).vexpand(true).build();
     container.set_tab_pos(gtk::PositionType::Left);
 
-    groups::load_groups(container.clone());
+    groups::load_groups(container.clone(), emojis);
 
     container
 }
