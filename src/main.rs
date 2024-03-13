@@ -1,3 +1,6 @@
+mod emojis;
+mod groups;
+
 use gtk::glib;
 use gtk::prelude::*;
 use gtk4 as gtk;
@@ -33,6 +36,7 @@ fn build_ui(app: &gtk::Application) {
     let window = gtk::ApplicationWindow::builder()
         .application(app)
         .default_height(200)
+        .default_width(450)
         .title("Emo")
         .child(&container)
         .build();
@@ -42,51 +46,9 @@ fn build_ui(app: &gtk::Application) {
 
 fn build_notebook() -> gtk::Notebook {
     let container = gtk::Notebook::builder().hexpand(true).vexpand(true).build();
+    container.set_tab_pos(gtk::PositionType::Left);
 
-    container.append_page(
-        &gtk::Label::new(Some("some content...")),
-        Some(&gtk::Label::new(Some("🕒️"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("😀"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("🐶"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("🍎"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("⚽️"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("🏚️"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("💡"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("❗️"))),
-    );
-
-    container.append_page(
-        &gtk::Label::new(Some("more content...")),
-        Some(&gtk::Label::new(Some("🇧🇷"))),
-    );
+    groups::load_groups(container.clone());
 
     container
 }
