@@ -1,5 +1,6 @@
 mod emojis;
 mod groups;
+mod search;
 
 use gtk::glib;
 use gtk::prelude::*;
@@ -28,10 +29,16 @@ fn build_ui(app: &gtk::Application) {
         .margin_end(5)
         .build();
 
-    let notebook = build_notebook();
+    let search_result_container = search::build_search_result();
+
+    let stack = gtk::Stack::builder().build();
+    stack.add_named(&build_notebook(), Some("notebook"));
+    stack.add_named(&search_result_container, Some("search"));
 
     container.append(&search_entry);
-    container.append(&notebook);
+    container.append(&stack);
+
+    search_entry.connect_changed(search::handle_search(stack, search_result_container));
 
     let window = gtk::ApplicationWindow::builder()
         .application(app)
