@@ -13,8 +13,14 @@ pub fn load_groups(container: gtk::Notebook, emojis: Rc<Vec<Rc<emojis::Emoji>>>)
     let mut create_group = |symbol: &str, names: &[&str]| {
         let group_box = gtk::FlowBox::builder()
             .selection_mode(gtk::SelectionMode::None)
+            .activate_on_single_click(true)
             .build();
         let scrolled = gtk::ScrolledWindow::builder().child(&group_box).build();
+
+        group_box.connect_child_activated(|_, box_child| {
+            // for some reason it has ~300ms of delay :(
+            box_child.child().unwrap().activate();
+        });
 
         container.append_page(
             &scrolled,
@@ -44,15 +50,17 @@ pub fn load_groups(container: gtk::Notebook, emojis: Rc<Vec<Rc<emojis::Emoji>>>)
             let btn = gtk::Button::builder()
                 .tooltip_text(&emoji.annotation)
                 .label(&emoji.emoji)
+                .focusable(false)
                 .build();
 
-            btn.connect_clicked(clone!(@strong emoji => move |_| {
+            btn.connect_clicked(clone!(@strong emoji, @weak btn => move |_| {
                 println!("{}: {}", emoji.annotation, emoji.emoji);
                 let clipboard = gdk::Display::default()
                     .expect("Failed to get display")
                     .clipboard();
 
                 clipboard.set_text(&emoji.emoji);
+                btn.parent().unwrap().grab_focus();
             }));
 
             container.append(&btn);

@@ -18,6 +18,8 @@ fn main() -> glib::ExitCode {
 }
 
 fn build_ui(app: &gtk::Application) {
+    load_global_css();
+
     let search_entry = gtk::Entry::builder()
         .placeholder_text("Search here")
         .primary_icon_name("system-search-symbolic")
@@ -78,4 +80,15 @@ fn build_notebook(emojis: Rc<Vec<Rc<emojis::Emoji>>>) -> gtk::Notebook {
     groups::load_groups(container.clone(), emojis);
 
     container
+}
+
+fn load_global_css() {
+    let provider = gtk::CssProvider::new();
+    provider.load_from_data(include_str!("style.css"));
+
+    gtk::style_context_add_provider_for_display(
+        &gtk::gdk::Display::default().expect("Could not connect to a display."),
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
