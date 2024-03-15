@@ -46,6 +46,11 @@ pub fn load_groups(container: gtk::Notebook, emojis: Rc<Vec<Rc<emojis::Emoji>>>)
     create_group("🇧🇷", &["flags"]);
 
     for emoji in emojis.as_ref() {
+        // ignore skin toned emojis
+        if emoji.skintone_base_emoji != emoji.emoji && emoji.skintone_base_emoji != ""{
+            continue;
+        }
+
         if let Some(container) = groups_containers.get(&emoji.group) {
             let btn = gtk::Button::builder()
                 .tooltip_text(&emoji.annotation)
