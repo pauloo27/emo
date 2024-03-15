@@ -58,6 +58,11 @@ fn build_ui(app: &gtk::Application) {
 
     navigation::handle_navigation(app, &window, &notebook);
 
+    window.connect_close_request(|window| {
+        window.set_visible(false);
+        glib::Propagation::Stop
+    });
+
     window.present();
 }
 
