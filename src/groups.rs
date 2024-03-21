@@ -1,7 +1,5 @@
+use crate::emoji_btn::build_emoji_btn;
 use crate::emojis;
-use glib::clone;
-use gtk::gdk;
-use gtk::glib;
 use gtk::prelude::*;
 use gtk4 as gtk;
 use std::collections::HashMap;
@@ -47,27 +45,12 @@ pub fn load_groups(container: gtk::Notebook, emojis: Rc<Vec<Rc<emojis::Emoji>>>)
 
     for emoji in emojis.as_ref() {
         // ignore skin toned emojis
-        if emoji.skintone_base_emoji != emoji.emoji && emoji.skintone_base_emoji != ""{
+        if emoji.is_skintone() {
             continue;
         }
 
         if let Some(container) = groups_containers.get(&emoji.group) {
-            let btn = gtk::Button::builder()
-                .tooltip_text(&emoji.annotation)
-                .label(&emoji.emoji)
-                .focusable(false)
-                .build();
-
-            btn.connect_clicked(clone!(@strong emoji, @weak btn => move |_| {
-                println!("{}: {}", emoji.annotation, emoji.emoji);
-                let clipboard = gdk::Display::default()
-                    .expect("Failed to get display")
-                    .clipboard();
-
-                clipboard.set_text(&emoji.emoji);
-                btn.parent().unwrap().grab_focus();
-            }));
-
+            let btn = build_emoji_btn(emoji.clone());
             container.append(&btn);
         };
     }

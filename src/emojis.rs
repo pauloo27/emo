@@ -14,6 +14,12 @@ pub struct Emoji {
     pub skintone_base_emoji: String,
 }
 
+impl Emoji {
+    pub fn is_skintone(&self) -> bool {
+        self.skintone_base_emoji != self.emoji && self.skintone_base_emoji != ""
+    }
+}
+
 pub fn load_emojis() -> AnyResult<Vec<Emoji>> {
     let data = include_str!("./emojis.json");
 

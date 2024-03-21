@@ -1,3 +1,4 @@
+mod emoji_btn;
 mod emojis;
 mod groups;
 mod navigation;
@@ -37,16 +38,26 @@ fn build_ui(app: &gtk::Application) {
     let emoji_list = must_load_emojis();
 
     let search_result_container = search::build_search_result();
+    let scrolled_search_result = gtk::ScrolledWindow::builder()
+        .child(&search_result_container)
+        .hexpand(true)
+        .vexpand(true)
+        .build();
+
     let notebook = build_notebook(emoji_list.clone());
 
     let stack = gtk::Stack::builder().build();
     stack.add_named(&notebook, Some("notebook"));
-    stack.add_named(&search_result_container, Some("search"));
+    stack.add_named(&scrolled_search_result, Some("search"));
 
     container.append(&search_entry);
     container.append(&stack);
 
-    search_entry.connect_changed(search::handle_search(stack, search_result_container));
+    search_entry.connect_changed(search::handle_search(
+        stack,
+        search_result_container,
+        emoji_list,
+    ));
 
     let window = gtk::ApplicationWindow::builder()
         .application(app)
