@@ -20,7 +20,7 @@ pub fn handle_search(
     container: gtk::FlowBox,
     emojis: Rc<Vec<Rc<emojis::Emoji>>>,
 ) -> impl Fn(&gtk::Entry) {
-    return move |entry: &gtk::Entry| {
+    move |entry: &gtk::Entry| {
         let value = entry.text();
         if value == "" {
             stack.set_visible_child_name("notebook");
@@ -36,7 +36,7 @@ pub fn handle_search(
             // show the thingy
             show_filtered_emojis(&value, emojis.clone(), container.clone());
         }
-    };
+    }
 }
 
 fn show_filtered_emojis(search: &str, emojis: Rc<Vec<Rc<emojis::Emoji>>>, container: gtk::FlowBox) {
